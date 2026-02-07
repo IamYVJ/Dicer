@@ -130,7 +130,7 @@ body {
     border: 2px solid var(--accent);
     border-radius: 20px;
     box-shadow: 0 4px 12px var(--shadow-dark);
-    animation: slideDown 0.4s ease;
+    animation: slideDown 0.3s ease;
 }
 
 .player-indicator span {
@@ -161,7 +161,7 @@ body {
     color: var(--accent);
     line-height: 1;
     text-shadow: 0 4px 16px var(--shadow-dark);
-    animation: pulse 0.6s ease;
+    animation: simpleFade 0.3s ease;
 }
 
 .result-label {
@@ -188,12 +188,12 @@ body {
     align-items: center;
     font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 800;
-    color: var(--accent);
-    background: var(--bg-secondary);
-    border: 3px solid var(--accent);
+    color: white;
+    background: var(--accent);
+    border: none;
     border-radius: 16px;
-    box-shadow: 0 6px 16px var(--shadow-dark);
-    animation: diceRoll 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    animation: simpleFade 0.3s ease;
 }
 
 /* Roll Button */
@@ -209,28 +209,8 @@ body {
     color: white;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     touch-action: manipulation;
-    position: relative;
-    overflow: hidden;
-}
-
-.roll-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.roll-btn:active::before {
-    width: 300px;
-    height: 300px;
 }
 
 .roll-btn:hover {
@@ -240,11 +220,6 @@ body {
 
 .roll-btn:active {
     transform: translateY(0);
-}
-
-.roll-text {
-    position: relative;
-    z-index: 1;
 }
 
 /* Scroll Indicator */
@@ -670,6 +645,7 @@ select:focus {
     border-radius: 12px;
     padding: 20px;
     min-height: 300px;
+    overflow-x: auto;
 }
 
 .chart-svg {
@@ -677,33 +653,35 @@ select:focus {
     height: 300px;
 }
 
-.chart-line {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+.chart-bar {
+    transition: opacity 0.2s ease;
 }
 
-.chart-dot {
-    fill: var(--accent);
+.chart-bar:hover {
+    opacity: 0.85;
 }
 
 .chart-axis {
     stroke: var(--text-tertiary);
-    stroke-width: 1;
+    stroke-width: 2;
 }
 
 .chart-label {
     fill: var(--text-secondary);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.bar-value-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .chart-grid {
     stroke: var(--border);
     stroke-width: 1;
     stroke-dasharray: 4 4;
+    opacity: 0.5;
 }
 
 /* History Modal */
@@ -768,29 +746,17 @@ select:focus {
 }
 
 /* ========================================
-   ANIMATIONS
+   ANIMATIONS - MINIMAL & LIGHTWEIGHT
    ======================================== */
 
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-@keyframes diceRoll {
-    0% {
-        transform: rotate(0deg) scale(0.5);
+@keyframes simpleFade {
+    from {
         opacity: 0;
+        transform: scale(0.9);
     }
-    50% {
-        transform: rotate(360deg) scale(1.1);
-    }
-    100% {
-        transform: rotate(720deg) scale(1);
+    to {
         opacity: 1;
+        transform: scale(1);
     }
 }
 
@@ -819,7 +785,7 @@ select:focus {
 @keyframes modalSlideUp {
     from {
         opacity: 0;
-        transform: translateY(50px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
@@ -828,14 +794,11 @@ select:focus {
 }
 
 @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
+    0%, 100% {
         transform: translateY(0);
     }
-    40% {
-        transform: translateY(-10px);
-    }
-    60% {
-        transform: translateY(-5px);
+    50% {
+        transform: translateY(-8px);
     }
 }
 
@@ -939,5 +902,13 @@ select:focus {
     .individual-display {
         grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
         gap: 12px;
+    }
+    
+    .chart-svg {
+        height: 250px;
+    }
+    
+    .stats-chart {
+        padding: 15px;
     }
 }

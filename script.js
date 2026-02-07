@@ -357,58 +357,108 @@ function renderChart(data, statsType) {
     const width = 540;
     const height = 300;
     const padding = 50;
+    const bottomPadding = 60;
     
     const maxValue = Math.max(...data.map(([, count]) => count));
-    const minX = Math.min(...data.map(([val]) => val));
-    const maxX = Math.max(...data.map(([val]) => val));
+    const chartHeight = height - padding - bottomPadding;
     
-    const xScale = (val) => padding + ((val - minX) / (maxX - minX)) * (width - 2 * padding);
-    const yScale = (val) => height - padding - ((val / maxValue) * (height - 2 * padding));
+    const numBars = data.length;
+    const availableWidth = width - 2 * padding;
+    const barSpacing = numBars > 10 ? 4 : 8;
+    const barWidth = Math.max(20, (availableWidth - (numBars - 1) * barSpacing) / numBars);
+    
+    const yScale = (val) => {
+        if (maxValue === 0) return chartHeight;
+        return chartHeight - ((val / maxValue) * chartHeight);
+    };
     
     let svg = `<svg class="chart-svg" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
     
+    // Simple gradient
+    svg += `<defs>
+        <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:var(--accent);stop-opacity:1" />
+            <stop offset="100%" style="stop-color:var(--accent-hover);stop-opacity:1" />
+        </linearGradient>
+    </defs>`;
+    
     // Grid lines
-    for (let i = 0; i <= 5; i++) {
-        const y = padding + (i * (height - 2 * padding) / 5);
+    const numGridLines = 5;
+    for (let i = 0; i <= numGridLines; i++) {
+        const y = padding + (i * chartHeight / numGridLines);
         svg += `<line class="chart-grid" x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}"/>`;
     }
     
     // Axes
-    svg += `<line class="chart-axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}"/>`;
-    svg += `<line class="chart-axis" x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}"/>`;
+    svg += `<line class="chart-axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - bottomPadding}"/>`;
+    svg += `<line class="chart-axis" x1="${padding}" y1="${height - bottomPadding}" x2="${width - padding}" y2="${height - bottomPadding}"/>`;
     
     // Y-axis labels
-    for (let i = 0; i <= 5; i++) {
-        const val = Math.round((maxValue / 5) * (5 - i));
-        const y = padding + (i * (height - 2 * padding) / 5);
+    for (let i = 0; i <= numGridLines; i++) {
+        const val = Math.round((maxValue / numGridLines) * (numGridLines - i));
+        const y = padding + (i * chartHeight / numGridLines);
         svg += `<text class="chart-label" x="${padding - 10}" y="${y + 5}" text-anchor="end">${val}</text>`;
     }
     
-    // X-axis labels
-    data.forEach(([val]) => {
-        const x = xScale(val);
-        svg += `<text class="chart-label" x="${x}" y="${height - padding + 20}" text-anchor="middle">${val}</text>`;
+    const totalBarsWidth = (barWidth * numBars) + (barSpacing * (numBars - 1));
+    const startX = padding + (availableWidth - totalBarsWidth) / 2;
+    
+    // Draw bars
+    data.forEach(([val, count], index) => {
+        const x = startX + (index * (barWidth + barSpacing));
+        const barHeight = chartHeight - yScale(count);
+        const y = padding + yScale(count);
+        
+        // Main bar
+        svg += `<rect class="chart-bar" 
+            x="${x}" 
+            y="${y}" 
+            width="${barWidth}" 
+            height="${barHeight}" 
+            rx="6" 
+            fill="url(#barGradient)"/>`;
+        
+        // Value label
+        if (barHeight > 25) {
+            svg += `<text class="bar-value-label" 
+                x="${x + barWidth / 2}" 
+                y="${y + 18}" 
+                text-anchor="middle" 
+                fill="white" 
+                font-weight="700" 
+                font-size="12">${count}</text>`;
+        } else {
+            svg += `<text class="bar-value-label" 
+                x="${x + barWidth / 2}" 
+                y="${y - 8}" 
+                text-anchor="middle" 
+                fill="var(--text-primary)" 
+                font-weight="700" 
+                font-size="12">${count}</text>`;
+        }
+        
+        // X-axis label
+        svg += `<text class="chart-label" 
+            x="${x + barWidth / 2}" 
+            y="${height - bottomPadding + 20}" 
+            text-anchor="middle">${val}</text>`;
     });
     
-    // Line path
-    const pathData = data.map(([val, count], index) => {
-        const x = xScale(val);
-        const y = yScale(count);
-        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(' ');
+    // Axis titles
+    svg += `<text class="chart-label" 
+        x="${width / 2}" 
+        y="${height - 10}" 
+        text-anchor="middle" 
+        font-weight="700" 
+        font-size="14">${statsType === 'dice' ? 'Dice Value' : 'Total Sum'}</text>`;
     
-    svg += `<path class="chart-line" d="${pathData}"/>`;
-    
-    // Data points
-    data.forEach(([val, count]) => {
-        const x = xScale(val);
-        const y = yScale(count);
-        svg += `<circle class="chart-dot" cx="${x}" cy="${y}" r="5"/>`;
-    });
-    
-    // Axis labels
-    svg += `<text class="chart-label" x="${width / 2}" y="${height - 5}" text-anchor="middle" font-weight="700">${statsType === 'dice' ? 'Dice Value' : 'Total Sum'}</text>`;
-    svg += `<text class="chart-label" x="15" y="${height / 2}" text-anchor="middle" transform="rotate(-90 15 ${height / 2})" font-weight="700">Rolls</text>`;
+    svg += `<text class="chart-label" 
+        x="15" 
+        y="${height / 2}" 
+        text-anchor="middle" 
+        transform="rotate(-90 15 ${height / 2})" 
+        font-weight="700" 
+        font-size="14">Number of Rolls</text>`;
     
     svg += '</svg>';
     
