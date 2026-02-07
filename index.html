@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Lightweight, elegant dice roller with balanced RNG and statistics">
+    <meta name="theme-color" content="#f0f0f5">
+    <title>Dice Roller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎲 Dice Roller</h1>
+        </header>
+
+        <!-- Controls Section -->
+        <section class="controls">
+            <div class="control-group">
+                <label for="diceCount">Number of Dice</label>
+                <input type="range" id="diceCount" min="1" max="12" value="2">
+                <span id="diceCountValue" class="value-display">2</span>
+            </div>
+
+            <div class="control-group">
+                <label for="diceType">Dice Type</label>
+                <select id="diceType">
+                    <option value="4">D4</option>
+                    <option value="6" selected>D6</option>
+                    <option value="8">D8</option>
+                    <option value="10">D10</option>
+                    <option value="12">D12</option>
+                    <option value="20">D20</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>RNG Mode</label>
+                <div class="toggle-group">
+                    <button id="randomMode" class="toggle-btn active">Random</button>
+                    <button id="balancedMode" class="toggle-btn">Balanced</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Display Mode</label>
+                <div class="toggle-group">
+                    <button id="totalMode" class="toggle-btn active">Total</button>
+                    <button id="individualMode" class="toggle-btn">Individual</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Display -->
+        <section class="result-area">
+            <div id="totalDisplay" class="total-display">
+                <div class="result-number">--</div>
+            </div>
+            <div id="individualDisplay" class="individual-display hidden">
+                <!-- Dice will be rendered here -->
+            </div>
+        </section>
+
+        <!-- Roll Button -->
+        <button id="rollBtn" class="roll-btn">
+            Roll Dice
+        </button>
+
+        <!-- History Section -->
+        <section class="history">
+            <h3>Recent Rolls</h3>
+            <ul id="historyList"></ul>
+        </section>
+
+        <!-- Footer Actions -->
+        <footer>
+            <button id="statsBtn" class="secondary-btn">📊 Statistics</button>
+            <button id="resetBtn" class="secondary-btn">🔄 Reset Session</button>
+        </footer>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Session Statistics</h2>
+                <button id="closeModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Total Rolls:</strong> <span id="totalRolls">0</span></p>
+                <div id="distributionChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
